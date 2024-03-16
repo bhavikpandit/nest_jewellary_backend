@@ -6,13 +6,13 @@ import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto, LoginUserDto } from './dto/user.dto';
+import { CreateUserDto, LoginUserDto, LogoutUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectModel(User.name) private userModel: Model<User>,
-        private jwtService: JwtService
+        private jwtService: JwtService,
         ) { }
 
     async getAll() {
@@ -45,26 +45,53 @@ export class UsersService {
     }
     async loginUser(loginUser: LoginUserDto) {
         const { email, password } = loginUser
-        const admin = await this.userModel.findOne({ email: email })
-        if (!admin) {
-            throw new BadRequestException("admin not found...")
+        const user = await this.userModel.findOne({ email: email })
+        if (!user) {
+            throw new BadRequestException("user not found...")
         }
 
-        const validPassword = await bcrypt.compare(password, admin.password)
+        const validPassword = await bcrypt.compare(password, user.password)
         console.log(validPassword)
 
         if (!validPassword) {
             throw new BadRequestException("password is invalid...")
         }
 
-        console.log("loggedIn admin ==>", admin)
-        // const token = this.jwtService.sign({ id: admin._id }, );
-        // console.log(token)
+        console.log("loggedIn admin ==>", User)
+        const token = this.jwtService.sign({ id: user._id }, );
+
+
+        user.accessToken = token;
+        await this.userModel.updateOne({_id: user.id}, {$set:{accessToken: token}})
+        console.log("user ==>", user)
         return {
             statusCode: HttpStatus.OK,
-            message: 'admin loggedin successfully...',
-            admin, 
-            // token: token
+            message: 'User loggedin successfully...',
+            user
         };
     }
+
+    async logoutUser(logoutUser: LogoutUserDto){
+        const user = await this.userModel.findOne({_id: logoutUser.id})
+        console.log("user==>", user)
+
+        if(!user){
+            throw new BadRequestException("user not found..")
+        }
+        await this.userModel.updateOne({_id: logoutUser.id}, {$set:{accessToken: ""}})
+        console.log("logout user ==>", user)
+        return{
+            statusCode: HttpStatus.OK,
+            message: 'User logout successfully...',
+        };
+    }
+
+    async validateToken(token: string) {
+        try {
+            return this.jwtService.verify(token);
+        } catch (error) {
+            return null;
+        }
+    }
+
 }
