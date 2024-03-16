@@ -3,11 +3,11 @@
 import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger'
-import { CreateUserDto, LoginUserDto } from './dto/user.dto';
+import { CreateUserDto, LoginUserDto, LogoutUserDto } from './dto/user.dto';
 
 
-@ApiTags('users')
-@Controller('users')
+@ApiTags('auth')
+@Controller('auth')
 export class UsersController {
     constructor( private userService: UsersService){}
 
@@ -34,6 +34,11 @@ export class UsersController {
     @Post('/login')
     async Login(@Body() body: LoginUserDto) {
         const user = await this.userService.loginUser(body)
+        return user
+    }
+    @Post('/logout')
+    async Logout(@Body() body: LogoutUserDto) {
+        const user = await this.userService.logoutUser(body)
         return user
     }
 

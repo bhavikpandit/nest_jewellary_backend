@@ -31,3 +31,9 @@ export class LoginUserDto {
     @IsString()
     password: string;
 }
+
+export class LogoutUserDto {
+    @ApiProperty()
+    @IsString()
+    id: string;
+}

@@ -7,7 +7,7 @@ import { User, UserSchema } from './schema/user.schema';
 import { UsersController } from './users.controller';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -15,13 +15,13 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => {
         return {
-          secretOrKey: 'bhavik2210',
+          secretOrPrivateKey: 'bhavik2210',
           signOptions: {expiresIn: '1h'}
         }
       }
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
   controllers: [UsersController],
-  providers: [UsersService, JwtService]
+  providers: [UsersService]
 })
 export class UsersModule { }
