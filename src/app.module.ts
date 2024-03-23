@@ -5,16 +5,24 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
+import { ProductsModule } from './products/products.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
+    MulterModule.register({
+      dest: './uploads'
+    }),
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
     }),
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/jewellary'),
+    MongooseModule.forRoot('mongodb://localhost:27017/craftgallary'),
     //MongooseModule.forRoot(process.env.MONGO_URL),
-    UsersModule
+    AdminModule,
+    UsersModule,
+    ProductsModule
   ],
   controllers: [AppController],
   providers: [AppService],
